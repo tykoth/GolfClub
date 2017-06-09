@@ -1,7 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent(typeof (AudioSource))]
 public class Shoot : MonoBehaviour {
+
+  [SerializeField] private AudioClip[] m_ShootingSounds;
+  private AudioSource m_AudioSource;
 
   private bool mouseDragging;
   private Vector3 forceVector;
@@ -71,6 +75,7 @@ public class Shoot : MonoBehaviour {
 
     //update the position of the dragzone
     dragZone.transform.position = transform.position;
+    m_AudioSource = GetComponent<AudioSource>();
   }
 	
 	// Update is called once per frame
@@ -125,7 +130,7 @@ public class Shoot : MonoBehaviour {
 
     // cleanup
     dragZone.GetComponent<Renderer>().enabled = false;
-
+    PlayShootingAudio();
 
   }
   
@@ -182,8 +187,18 @@ public class Shoot : MonoBehaviour {
       GUI.Box(new Rect(guiMouseCoord.x - 30, Screen.height - guiMouseCoord.y + 15, 100, 20), "force: " + Mathf.Round((forceVector).magnitude));
     }
   }  
-  
-  
+
+  private void PlayShootingAudio() {
+    
+    // pick & play a random footstep sound from the array,
+    // excluding sound at index 0
+    int n = Random.Range(1, m_ShootingSounds.Length);
+    m_AudioSource.clip = m_ShootingSounds[n];
+    m_AudioSource.PlayOneShot(m_AudioSource.clip);
+    // move picked sound to index 0 so it's not picked next time
+    m_ShootingSounds[n] = m_ShootingSounds[0];
+    m_ShootingSounds[0] = m_AudioSource.clip;
+  }
 
 	Mesh MakeDiscMeshBrute ( float r  ){
 		Mesh discMesh;
